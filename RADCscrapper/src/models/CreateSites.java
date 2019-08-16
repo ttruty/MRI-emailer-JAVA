@@ -27,4 +27,13 @@ public class CreateSites {
 				, 15);
 		return mgData;
 	}
+	
+	public SiteData MakeNoSite() {
+		ArrayList<String>siteIdentifiers = new ArrayList<String>();
+		siteIdentifiers.add("no site");
+		SiteData mgData = new SiteData("**** CHECK SITE ON SCHEDULE SYSTEM ****", " ", 
+				siteIdentifiers
+				, 30);
+		return mgData;
+	}
 }

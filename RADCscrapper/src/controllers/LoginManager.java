@@ -30,6 +30,10 @@ public class LoginManager {
 	public void logout() {
 		showLoginScreen();
 	}
+	
+	public void Edit() {
+		showEditView();
+	}
 
 	public void showLoginScreen() {
 		try {
@@ -51,5 +55,18 @@ public class LoginManager {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+	
+	private void showEditView() {
+		try {
+			// show staff edit menu
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/staffEdit.fxml"));
+			scene.setRoot((Parent) loader.load());			
+			StaffEditViewController controller = loader.getController();
+			controller.start(this);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		
 	}
 }

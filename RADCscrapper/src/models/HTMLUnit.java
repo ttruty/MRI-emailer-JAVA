@@ -149,7 +149,7 @@ public class HTMLUnit {
         	if (row.asText().contains(ApptType))
         	{
         		for (final HtmlTableCell cell : row.getCells()) {
-                    //System.out.println("   Found cell " + cellCount +" : " + cell.asText());
+                    System.out.println("   Found cell " + cellCount +" : " + cell.asText());
                     switch (cellCount) {
                     case 1:
                       projID = cell.asText();
@@ -163,9 +163,14 @@ public class HTMLUnit {
                     case 4:
                       dateTime = cell.asText();
                       break;
-                    case 5:
-                      location = cell.asText().toLowerCase();
-                      break;
+                    case 5:       
+                    	location = cell.asText().toLowerCase();
+                    	System.out.println("Site=(" + location.length() + ")");
+                    	if (location.length() == 7)
+                    	{
+                    		location = "no site";
+                    	}
+                    	break;
                     case 6:
                       address = cell.asText();
                       break;
@@ -188,9 +193,11 @@ public class HTMLUnit {
             	CreateSites makeSites = new CreateSites();
             	SiteData mg = makeSites.MakeMGSite();
             	SiteData uc = makeSites.MakeUCSite();
+            	SiteData ns = makeSites.MakeNoSite();
             	SiteData locationSelection = null;
             	if (mg.getSiteIdentifiers().parallelStream().anyMatch(location::contains)) {locationSelection = mg;}
             	if (uc.getSiteIdentifiers().parallelStream().anyMatch(location::contains)) {locationSelection = uc;}
+            	if (ns.getSiteIdentifiers().parallelStream().anyMatch(location::contains)) {locationSelection = ns;}
             	ParticipantData partInfo = new ParticipantData(projID, name, phone, partAddress);
             	AppointmentData singleApp = new AppointmentData(convertedDate, staff, partInfo, locationSelection, false, apptName);
             	//System.out.println(appInfo.toString());

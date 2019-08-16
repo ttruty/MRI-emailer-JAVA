@@ -17,8 +17,8 @@ public class Main extends Application {
 
 		    stage.setScene(scene);
 		    stage.setTitle("MRI Emailer");
-		    stage.setHeight(480);
-		    stage.setWidth(490);
+		    stage.setHeight(605);
+		    stage.setWidth(520);
 		    stage.show();	
 		    
 		    

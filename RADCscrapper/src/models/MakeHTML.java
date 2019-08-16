@@ -22,7 +22,7 @@ public class MakeHTML {
 				lines.add("    DRIVER SHOULD CALL ON-SITE CONTACT FIVE MINUTES BEFORE ARRIVAL AND WAIT\r\n" );
 				lines.add("    WITH PARTICIPANT UNTIL CONTACT MEETS THEM.</b><br><br>");
 		for (AppointmentData singleAppointment : data) {
-			if (singleAppointment != null)
+			if (singleAppointment != null && singleAppointment.getAssessment().contains("MRI"))
 			{
 				System.out.println(singleAppointment.toString());
 				lines.add(formAppointmentDetials(singleAppointment));
@@ -36,7 +36,7 @@ public class MakeHTML {
 	
 	private String formAppointmentDetials(AppointmentData data) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
-		System.out.println(data.getSite().getMinutesAdjust());
+		//System.out.println(data.getSite().getMinutesAdjust());
 		LocalDateTime adjustDropOff = data.getDate().minusMinutes(data.getSite().getMinutesAdjust());
 		LocalDateTime adjustPickUpOff = data.getDate().plusHours(1);
 		DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEE M/dd/yyyy", Locale.ENGLISH);

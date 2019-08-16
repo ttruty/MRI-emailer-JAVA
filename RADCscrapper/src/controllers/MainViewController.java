@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,25 +20,30 @@ import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import models.AppointmentData;
 import models.MakeHTML;
 import models.MakeStaffURLS;
-import models.ProgressBarModel;
 import models.ReadScheduleData;
 import models.RunPython;
 import models.Staff;
+import models.StaffTable;
 import models.StaffTableData;
 
 
@@ -49,25 +56,18 @@ public class MainViewController {
   @FXML private ScrollPane scrollPane;
   @FXML private DatePicker startDate;
   @FXML private DatePicker endDate;
-  @FXML private ProgressBar progressBar;
-  public static ProgressBarModel model = new ProgressBarModel();
+  @FXML private AnchorPane ringPane;
   
   //table variables
   @FXML private TableView<StaffTableData> staffTable;
-
-  private Property<StaffTableData> staffProperty;
-  private ChangeListener<StaffTableData> staffListener;
-  private ArrayList<Staff> staffBooked = new ArrayList<Staff>();
-  //set up the scene
-	  // (1.0F = 100%)
-	  // (0.25 = 25%) etc.
-  public void setProgress(ProgressBarModel model){
-      progressBar.progressProperty().bind(ProgressBarModel.workToDoProperty().divide(100d));
-  }
+  LoginManager login;
   
+  //set up the scene  
   public void start(final LoginManager loginManager) {
+	  
+	  login = loginManager;
 	  try {
-		populateTableView();
+		StaffTable.populateTableView(staffTable);
 	} catch (IOException e1) {
 		// TODO Auto-generated catch block
 		e1.printStackTrace();
@@ -75,7 +75,7 @@ public class MainViewController {
 	  startButton.setOnAction((e) -> {
 		  List<LocalDate> dates = datePickers();
 		  MakeStaffURLS makeURL = new MakeStaffURLS();
-		  Map<String,Staff> staffMap = makeURL.Generate(staffBooked, dates);
+		  Map<String,Staff> staffMap = makeURL.Generate(StaffTable.staffBooked, dates);
 		  		  
 		  System.out.println("READING SCHEDULE\n\n\n");
 		  ReadScheduleData readSchedule = new ReadScheduleData();
@@ -101,8 +101,6 @@ public class MainViewController {
 		  
 	}); // end button
   } // end start
-         	  //file chooser
-
   
   //About menu item on menu bar
   @FXML
@@ -139,65 +137,13 @@ public class MainViewController {
 	  Platform.exit();
 	  System.exit(0);
 	  } //end closeApp
+  
+  @FXML
+  public void staffEdit(ActionEvent event) {
+	  //select edit staff on the menu bar
+	  login.Edit();
+	  } //end staffEdit
 
-  public void populateTableView() throws IOException {
-	  staffTable.getItems().clear();
-	  staffTable.refresh();
-	  
-	  ObservableList<StaffTableData> staffList = null;
-	  staffList = FXCollections.observableArrayList();
-	  
-	  File file = new File("resources/staff.txt"); 
-	  
-	  BufferedReader br = new BufferedReader(new FileReader(file)); 
-	  
-	  //table
-	  TableColumn<StaffTableData, String> idCol = new TableColumn("ID");
-      idCol.setMinWidth(30);
-      idCol.setMaxWidth(50);
-      idCol.setCellValueFactory(new PropertyValueFactory<StaffTableData, String>("staffIdProperty"));
-
-      TableColumn<StaffTableData, String> nameCol = new TableColumn("Name");
-      nameCol.setCellValueFactory(new PropertyValueFactory<StaffTableData, String>("staffNameProperty"));
-
-      TableColumn<StaffTableData, String> numCol = new TableColumn("Number");
-      numCol.setCellValueFactory(new PropertyValueFactory<StaffTableData, String>("staffNumberProperty"));
-
-      TableColumn<StaffTableData, String> emailCol = new TableColumn("Email");
-      emailCol.setCellValueFactory(new PropertyValueFactory<StaffTableData, String>("staffEmailProperty"));
-
-      staffTable.getColumns().addAll(idCol, nameCol, numCol, emailCol);
-      staffTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-	  
-	  String st; 
-	  while ((st = br.readLine()) != null) 
-	  {
-	    //System.out.println(st); 
-	  	String[] dataLine = st.split(",");
-	  	int count = 0;
-	  	for (String line : dataLine) {
-	  		String[] staffData = line.split(":");
-	  		Staff staff = new Staff(staffData[1], staffData[0], staffData[2], staffData[3]);
-	  		staffBooked.add(staff);
-//	  		System.out.println(staff.toString());
-	  		staffList.add(new StaffTableData(staff.getID(), staff.getFirstName(), staff.getPhoneNumber(), staff.getEmail()));
-	  		count++;
-	  	}	  	
-	  }
-	  staffTable.setItems(staffList);
-	  //staffTable.setItems(staffList);
-	  
-	  
-	  
-	  staffTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
-		    if (newValue != null) {
-		        System.out.println("Selected Staff: "
-		            + newValue.getStaffIdProperty() + " | "
-		            + newValue.getStaffNameProperty()
-		        );
-		   }
-		});
-  }
 
   public List<LocalDate> datePickers() {
 	  List<LocalDate> dates = new ArrayList<LocalDate>();
